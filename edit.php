@@ -16,20 +16,20 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $emp_status = $_POST['emp_status'];
     $emp_start = $_POST['emp_start'];
     $emp_endson = $_POST['emp_endson'];
-    $filename = $_POST['old_picture']; // default to old picture
+    $filename = $_POST['old_picture']; 
 
-    // If a new image is uploaded
+   
     if ($_FILES['emp_picture']['name']) {
         $tmp_name = $_FILES['emp_picture']['tmp_name'];
         $imageData = file_get_contents($tmp_name);
 
-        // Create image from string
+       
         $img = imagecreatefromstring($imageData);
 
         if ($img !== false) {
-            $filename = $empid . ".jpg"; // rename to empid.jpg
+            $filename = $empid . ".jpg"; 
             $destination = "uploads/" . $filename;
-            imagejpeg($img, $destination, 90); // Save as .jpg
+            imagejpeg($img, $destination, 90); 
             imagedestroy($img);
         } else {
             echo "Error: Invalid image file.";
