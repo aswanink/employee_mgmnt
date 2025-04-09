@@ -2,7 +2,7 @@
 include 'db.php';
 
 if (isset($_GET['id'])) {
-    $empid = $_GET['id'];
+    $empid = (int)$_GET['id'];
     $result = mysqli_query($conn, "SELECT * FROM employee WHERE empid = $empid");
     $row = mysqli_fetch_assoc($result);
 }
@@ -16,13 +16,25 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $emp_status = $_POST['emp_status'];
     $emp_start = $_POST['emp_start'];
     $emp_endson = $_POST['emp_endson'];
+    $filename = $_POST['old_picture']; // default to old picture
 
+    // If a new image is uploaded
     if ($_FILES['emp_picture']['name']) {
-        $filename = $_FILES['emp_picture']['name'];
         $tmp_name = $_FILES['emp_picture']['tmp_name'];
-        move_uploaded_file($tmp_name, "uploads/" . $filename);
-    } else {
-        $filename = $_POST['old_picture'];
+        $imageData = file_get_contents($tmp_name);
+
+        // Create image from string
+        $img = imagecreatefromstring($imageData);
+
+        if ($img !== false) {
+            $filename = $empid . ".jpg"; // rename to empid.jpg
+            $destination = "uploads/" . $filename;
+            imagejpeg($img, $destination, 90); // Save as .jpg
+            imagedestroy($img);
+        } else {
+            echo "Error: Invalid image file.";
+            exit;
+        }
     }
 
     $sql = "UPDATE employee SET 
@@ -149,7 +161,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         <label>Picture:</label>
         <input type="file" name="emp_picture">
         <?php if (!empty($row['emp_picture'])): ?>
-            <img src="uploads/<?= $row['emp_picture'] ?>" width="50">
+            <img src="uploads/<?= $row['emp_picture'] ?>" width="80">
         <?php endif; ?>
 
         <button type="submit">Update Employee</button>

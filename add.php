@@ -11,22 +11,31 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $emp_endson = $_POST['emp_endson'];
     $created_date = date('Y-m-d H:i:s');
 
-   
-    $filename = $_FILES['emp_picture']['name'];
-    $tmp_name = $_FILES['emp_picture']['tmp_name'];
-    move_uploaded_file($tmp_name, "uploads/" . $filename);
+    // First insert into DB without image
+    $sql = "INSERT INTO employee (empname, deptid, emp_mobile, emp_salary, emp_status, emp_start, emp_endson, created_date)
+            VALUES ('$empname', '$deptid', '$emp_mobile', '$emp_salary', '$emp_status', '$emp_start', '$emp_endson', '$created_date')";
 
-    $sql = "INSERT INTO employee (empname, deptid, emp_mobile, emp_salary, emp_status, emp_picture, emp_start, emp_endson, created_date)
-            VALUES ('$empname', '$deptid', '$emp_mobile', '$emp_salary', '$emp_status', '$filename', '$emp_start', '$emp_endson', '$created_date')";
-    
     if (mysqli_query($conn, $sql)) {
+        // ✅ Get the inserted employee ID here
+        $empid = mysqli_insert_id($conn);
+
+        // ✅ Now handle the image upload
+        if (!empty($_FILES['emp_picture']['tmp_name'])) {
+            $imagePath = "uploads/" . $empid . ".jpg";
+            move_uploaded_file($_FILES['emp_picture']['tmp_name'], $imagePath);
+
+            // ✅ Update emp_picture column
+            mysqli_query($conn, "UPDATE employee SET emp_picture = '$empid.jpg' WHERE empid = $empid");
+        }
+
+        // ✅ Redirect after success
         header("Location: list.php");
         exit;
     } else {
         echo "Error: " . mysqli_error($conn);
     }
-    
 }
+
 ?>
 
 <!DOCTYPE html>
