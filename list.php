@@ -28,10 +28,23 @@ $result = mysqli_query($conn, "
         border-radius: 5px;
         margin-bottom: 15px;
         }
-.btn-add:hover {
-    background: #218838;
-}
-
+    .btn-add:hover {
+        background: #218838;
+    }
+    .status-toggle {
+        padding: 6px 12px;
+        border-radius: 4px;
+        font-weight: bold;
+        color: #fff;
+        display: inline-block;
+        text-decoration: none;
+    }
+    .status-active {
+        background-color: green;
+    }
+    .status-inactive {
+        background-color: red;
+    }
     </style>
 </head>
 <body>
@@ -57,23 +70,65 @@ $result = mysqli_query($conn, "
             <td><?= $row['deptname'] ?></td>
             <td><?= $row['emp_mobile'] ?></td>
             <td><?= $row['emp_salary'] ?></td>
-            <td><?= $row['emp_status'] == 1 ? 'Active' : 'Inactive' ?></td>
+            <td>
+                <a href="javascript:void(0);" 
+                    class="status-toggle <?= $row['emp_status'] == 1 ? 'status-active' : 'status-inactive' ?>" 
+                    data-id="<?= $row['empid'] ?>" 
+                    data-status="<?= $row['emp_status'] ?>">
+                    <?= $row['emp_status'] == 1 ? 'Active' : ($row['emp_status'] === 0 ? 'Inactive' : 'Inactive') ?>
+                 </a>
+            </td>
+
             <td><?= $row['emp_start'] ?></td>
             <td><?= $row['emp_endson'] ?></td>
             <td>
                 <?php if (!empty($row['emp_picture']) && file_exists("uploads/" . $row['emp_picture'])): ?>
                     <img src="uploads/<?= $row['emp_picture'] ?>?v=<?= time() ?>" width="50">
                 <?php else: ?>
-                    N/A
+                   Inactive
                 <?php endif; ?>
             </td>
             <td>
                 <a class="btn" href="edit.php?id=<?= $row['empid'] ?>">Edit</a>
                 <a class="btn btn-delete" href="delete.php?id=<?= $row['empid'] ?>" onclick="return confirm('Are you sure you want to delete this employee?');">Delete</a>
             </td>
-            
         </tr>
         <?php endwhile; ?>
     </table>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+console.log("JavaScript is working!");  
+$(document).on('click', '.status-toggle', function() {
+    var el = $(this);
+    var empId = el.data('id');
+    var currentStatus = el.data('status');
+    var newStatus = currentStatus == 1 ? 0 : 1;  
+
+    console.log("Emp ID: " + empId + ", Current Status: " + currentStatus + ", New Status: " + newStatus);
+
+    $.ajax({
+        url: 'update_status.php',
+        type: 'POST',
+        data: { empid: empId, status: newStatus },
+        success: function(response) {
+            console.log("Response from server:", response); 
+            if (response.trim() === "success") {
+                
+                el.text(newStatus == 1 ? 'Active' : 'Inactive');
+                el.data('status', newStatus);
+                el.removeClass('status-active status-inactive');
+                el.addClass(newStatus == 1 ? 'status-active' : 'status-inactive');
+            } else {
+                alert("Failed to update status.");
+            }
+        },
+        error: function(xhr, status, error) {
+            console.log("AJAX Error:", error);  
+        }
+    });
+});
+
+</script>
+
 </body>
 </html>
