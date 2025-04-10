@@ -1,13 +1,22 @@
 <?php
 include 'db.php';
 
-if (isset($_GET['id'])) {
-    $empid = (int)$_GET['id'];
-    $result = mysqli_query($conn, "SELECT * FROM employee WHERE empid = $empid");
-    $row = mysqli_fetch_assoc($result);
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
+
+if (!isset($_GET['id'])) {
+    die("Employee ID not specified.");
 }
 
-if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+$empid = (int)$_GET['id'];
+$result = mysqli_query($conn, "SELECT * FROM employee WHERE empid = $empid");
+$row = mysqli_fetch_assoc($result);
+
+if (!$row) {
+    die("Employee not found.");
+}
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $empid = $_POST['empid'];
     $empname = $_POST['empname'];
     $deptid = $_POST['deptid'];
@@ -16,25 +25,12 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $emp_status = $_POST['emp_status'];
     $emp_start = $_POST['emp_start'];
     $emp_endson = $_POST['emp_endson'];
-    $filename = $_POST['old_picture']; 
+    $filename = $_POST['old_picture'];
 
-   
-    if ($_FILES['emp_picture']['name']) {
-        $tmp_name = $_FILES['emp_picture']['tmp_name'];
-        $imageData = file_get_contents($tmp_name);
-
-       
-        $img = imagecreatefromstring($imageData);
-
-        if ($img !== false) {
-            $filename = $empid . ".jpg"; 
-            $destination = "uploads/" . $filename;
-            imagejpeg($img, $destination, 90); 
-            imagedestroy($img);
-        } else {
-            echo "Error: Invalid image file.";
-            exit;
-        }
+    if (!empty($_FILES['emp_picture']['tmp_name'])) {
+        $filename = $empid . ".jpg";
+        $destination = "uploads/" . $filename;
+        move_uploaded_file($_FILES['emp_picture']['tmp_name'], $destination);
     }
 
     $sql = "UPDATE employee SET 
@@ -62,65 +58,20 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 <head>
     <title>Edit Employee</title>
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 40px;
-            background: #f4f4f4;
-        }
-        .container {
-            max-width: 600px;
-            margin: auto;
-            background: white;
-            padding: 30px;
-            box-shadow: 0 0 10px #ccc;
-            border-radius: 10px;
-        }
-        h2 {
-            text-align: center;
-        }
-        label {
-            font-weight: bold;
-            display: block;
-            margin-top: 15px;
-        }
-        input[type="text"], input[type="date"], select, input[type="file"] {
-            width: 100%;
-            padding: 10px;
-            margin-top: 5px;
-            box-sizing: border-box;
-        }
-        button {
-            margin-top: 20px;
-            background: #28a745;
-            color: white;
-            border: none;
-            padding: 10px 15px;
-            cursor: pointer;
-            border-radius: 5px;
-            width: 100%;
-        }
-        button:hover {
-            background: #218838;
-        }
-        .back-link {
-            display: inline-block;
-            margin-bottom: 20px;
-            text-decoration: none;
-            color: #007bff;
-        }
-        .back-link:hover {
-            text-decoration: underline;
-        }
-        img {
-            margin-top: 10px;
-            border-radius: 4px;
-        }
+        body { font-family: Arial; background: #f4f4f4; padding: 20px; }
+        .container { background: #fff; padding: 20px; max-width: 600px; margin: auto; box-shadow: 0 0 10px #ccc; border-radius: 10px; }
+        h2 { text-align: center; }
+        label { display: block; margin-top: 15px; font-weight: bold; }
+        input, select { width: 100%; padding: 8px; margin-top: 5px; }
+        button { margin-top: 20px; background: #28a745; color: white; padding: 10px; border: none; border-radius: 4px; width: 100%; cursor: pointer; }
+        button:hover { background: #218838; }
+        img { margin-top: 10px; border-radius: 4px; display: block; }
+        a { display: inline-block; margin-bottom: 20px; color: #007bff; text-decoration: none; }
     </style>
 </head>
 <body>
 <div class="container">
-    <a class="back-link" href="list.php">← Back to Employee List</a>
-
+    <a href="list.php">← Back to List</a>
     <h2>Edit Employee</h2>
     <form method="POST" enctype="multipart/form-data">
         <input type="hidden" name="empid" value="<?= $row['empid'] ?>">
@@ -131,11 +82,12 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
         <label>Department:</label>
         <select name="deptid" required>
+            <option value="">--Select--</option>
             <?php
             $depts = mysqli_query($conn, "SELECT * FROM department");
             while ($dept = mysqli_fetch_assoc($depts)) {
-                $selected = $dept['deptid'] == $row['deptid'] ? 'selected' : '';
-                echo "<option value='{$dept['deptid']}' $selected>{$dept['deptname']}</option>";
+                $sel = $dept['deptid'] == $row['deptid'] ? "selected" : "";
+                echo "<option value='{$dept['deptid']}' $sel>{$dept['deptname']}</option>";
             }
             ?>
         </select>
@@ -147,7 +99,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         <input type="text" name="emp_salary" value="<?= $row['emp_salary'] ?>" required>
 
         <label>Status:</label>
-        <select name="emp_status" required>
+        <select name="emp_status">
             <option value="1" <?= $row['emp_status'] == '1' ? 'selected' : '' ?>>Active</option>
             <option value="0" <?= $row['emp_status'] == '0' ? 'selected' : '' ?>>Inactive</option>
         </select>
@@ -159,13 +111,31 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         <input type="date" name="emp_endson" value="<?= $row['emp_endson'] ?>">
 
         <label>Picture:</label>
-        <input type="file" name="emp_picture">
-        <?php if (!empty($row['emp_picture'])): ?>
-            <img src="uploads/<?= $row['emp_picture'] ?>" width="80">
+        <?php if (!empty($row['emp_picture']) && file_exists("uploads/" . $row['emp_picture'])): ?>
+            <img id="preview-image" src="uploads/<?= $row['emp_picture'] ?>?v=<?= time() ?>" width="80">
+        <?php else: ?>
+            <img id="preview-image" src="placeholder.png" width="80">
         <?php endif; ?>
+        <input type="file" name="emp_picture" accept="image/*">
 
-        <button type="submit">Update Employee</button>
+        <button type="submit">Update</button>
     </form>
 </div>
+
+<script>
+    document.querySelector('input[name="emp_picture"]').addEventListener('change', function (event) {
+        const file = event.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function (e) {
+                const imgPreview = document.getElementById('preview-image');
+                if (imgPreview) {
+                    imgPreview.src = e.target.result;
+                }
+            };
+            reader.readAsDataURL(file);
+        }
+    });
+</script>
 </body>
 </html>
