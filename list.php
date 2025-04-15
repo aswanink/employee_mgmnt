@@ -1,5 +1,12 @@
 <?php
 include 'db.php';
+
+class Formatter {
+    public static function formatCurrency($number) {
+        return '₹' . number_format($number, 2);
+    }
+}
+
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
 
@@ -36,6 +43,8 @@ $sql = "SELECT e.*, d.deptname
         LIMIT $limit OFFSET $offset";
 $result = mysqli_query($conn, $sql);
 ?>
+
+
 
 <!DOCTYPE html>
 <html>
@@ -101,7 +110,8 @@ $result = mysqli_query($conn, $sql);
         <td><?= $row['empname'] ?></td>
         <td><?= $row['deptname'] ?></td>
         <td><?= $row['emp_mobile'] ?></td>
-        <td><?= $row['emp_salary'] ?></td>
+        <td><?= Formatter::formatCurrency($row['emp_salary']) ?></td>
+
         <td>
             <a href="javascript:void(0);" 
                class="status-toggle <?= $row['emp_status'] == 1 ? 'status-active' : 'status-inactive' ?>" 
