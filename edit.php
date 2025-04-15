@@ -74,11 +74,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <a href="list.php">← Back to List</a>
     <h2>Edit Employee</h2>
     <form method="POST" enctype="multipart/form-data">
-        <input type="hidden" name="empid" value="<?= $row['empid'] ?>">
-        <input type="hidden" name="old_picture" value="<?= $row['emp_picture'] ?>">
+        <input type="hidden" name="empid" value="<?php echo $row['empid']; ?>">
+        <input type="hidden" name="old_picture" value="<?php echo $row['emp_picture']; ?>">
 
         <label>Name:</label>
-        <input type="text" name="empname" value="<?= $row['empname'] ?>" required>
+        <input type="text" name="empname" value="<?php echo $row['empname']; ?>" required>
 
         <label>Department:</label>
         <select name="deptid" required>
@@ -93,26 +93,26 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         </select>
 
         <label>Mobile:</label>
-        <input type="text" name="emp_mobile" value="<?= $row['emp_mobile'] ?>" required>
+        <input type="text" name="emp_mobile" value="<?php echo $row['emp_mobile']; ?>" required>
 
         <label>Salary:</label>
-        <input type="text" name="emp_salary" value="<?= $row['emp_salary'] ?>" required>
+        <input type="text" name="emp_salary" value="<?php echo $row['emp_salary']; ?>" required>
 
         <label>Status:</label>
         <select name="emp_status">
-            <option value="1" <?= $row['emp_status'] == '1' ? 'selected' : '' ?>>Active</option>
-            <option value="0" <?= $row['emp_status'] == '0' ? 'selected' : '' ?>>Inactive</option>
+            <option value="1" <?php echo $row['emp_status'] == '1' ? 'selected' : ''; ?>>Active</option>
+            <option value="0" <?php echo $row['emp_status'] == '0' ? 'selected' : ''; ?>>Inactive</option>
         </select>
 
         <label>Start Date:</label>
-        <input type="date" name="emp_start" value="<?= $row['emp_start'] ?>">
+        <input type="date" name="emp_start" value="<?php echo $row['emp_start']; ?>">
 
         <label>End Date:</label>
-        <input type="date" name="emp_endson" value="<?= $row['emp_endson'] ?>">
+        <input type="date" name="emp_endson" value="<?php echo $row['emp_endson']; ?>">
 
         <label>Picture:</label>
         <?php if (!empty($row['emp_picture']) && file_exists("uploads/" . $row['emp_picture'])): ?>
-            <img id="preview-image" src="uploads/<?= $row['emp_picture'] ?>?v=<?= time() ?>" width="80">
+            <img id="preview-image" src="uploads/<?php echo $row['emp_picture']; ?>?v=<?php echo time(); ?>" width="80">
         <?php else: ?>
             <img id="preview-image" src="placeholder.png" width="80">
         <?php endif; ?>

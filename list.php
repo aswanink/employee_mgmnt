@@ -71,7 +71,7 @@ $result = mysqli_query($conn, $sql);
 
 
 <form method="GET" style="margin-bottom: 20px;">
-    <input type="text" name="search" placeholder="Search by name or mobile" value="<?= htmlspecialchars($search) ?>">
+    <input type="text" name="search" placeholder="Search by name or mobile" value="<?php echo htmlspecialchars($search); ?>">
     
     <select name="dept_filter">
         <option value="">All Departments</option>
@@ -106,32 +106,32 @@ $result = mysqli_query($conn, $sql);
     <?php if (mysqli_num_rows($result) > 0): ?>
     <?php while ($row = mysqli_fetch_assoc($result)): ?>
     <tr>
-        <td><?= $row['empid'] ?></td>
-        <td><?= $row['empname'] ?></td>
-        <td><?= $row['deptname'] ?></td>
-        <td><?= $row['emp_mobile'] ?></td>
-        <td><?= Formatter::formatCurrency($row['emp_salary']) ?></td>
+        <td><?php echo $row['empid']; ?></td>
+        <td><?php echo $row['empname']; ?></td>
+        <td><?php echo $row['deptname']; ?></td>
+        <td><?php echo $row['emp_mobile']; ?></td>
+        <td><?php echo Formatter::formatCurrency($row['emp_salary']); ?></td>
 
         <td>
             <a href="javascript:void(0);" 
-               class="status-toggle <?= $row['emp_status'] == 1 ? 'status-active' : 'status-inactive' ?>" 
-               data-id="<?= $row['empid'] ?>" 
-               data-status="<?= $row['emp_status'] ?>">
-               <?= $row['emp_status'] == 1 ? 'Active' : 'Inactive' ?>
+               class="status-toggle <?php echo $row['emp_status'] == 1 ? 'status-active' : 'status-inactive'; ?>" 
+               data-id="<?php echo $row['empid']; ?>" 
+               data-status="<?php echo $row['emp_status']; ?>">
+               <?php echo $row['emp_status'] == 1 ? 'Active' : 'Inactive'; ?>
             </a>
         </td>
-        <td><?= $row['emp_start'] ?></td>
-        <td><?= $row['emp_endson'] ?></td>
+        <td><?php echo $row['emp_start']; ?></td>
+        <td><?php echo $row['emp_endson']; ?></td>
         <td>
             <?php if (!empty($row['emp_picture']) && file_exists("uploads/" . $row['emp_picture'])): ?>
-                <img src="uploads/<?= $row['emp_picture'] ?>?v=<?= time() ?>" width="50">
+                <img src="uploads/<?php echo $row['emp_picture']; ?>?v=<?php echo time(); ?>" width="50">
             <?php else: ?>
                 N/A
             <?php endif; ?>
         </td>
         <td>
-            <a class="btn" href="edit.php?id=<?= $row['empid'] ?>">Edit</a>
-            <a class="btn" href="delete.php?id=<?= $row['empid'] ?>" onclick="return confirm('Are you sure?');">Delete</a>
+            <a class="btn" href="edit.php?id=<?php echo $row['empid'];?>">Edit</a>
+            <a class="btn" href="delete.php?id=<?php echo $row['empid']; ?>" onclick="return confirm('Are you sure?');">Delete</a>
         </td>
     </tr>
     <?php endwhile; ?>
