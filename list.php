@@ -36,11 +36,16 @@ $totalRecords = $rowCount['total'];
 $totalPages = ceil($totalRecords / $limit);
 
 
-$sql = "SELECT e.*, d.deptname 
+$sql = "SELECT e.empid, e.empname, e.deptid, e.emp_mobile, e.emp_salary, e.emp_picture, e.emp_status,
+               IF(e.emp_start IS NULL OR e.emp_start = '0000-00-00', '-', DATE_FORMAT(e.emp_start, '%d-%m-%Y')) AS emp_start,
+               IF(e.emp_endson IS NULL OR e.emp_endson = '0000-00-00', '-', DATE_FORMAT(e.emp_endson, '%d-%m-%Y')) AS emp_endson,
+               e.created_date,
+               d.deptname 
         FROM employee e 
         LEFT JOIN department d ON e.deptid = d.deptid 
         $where 
         LIMIT $limit OFFSET $offset";
+
 $result = mysqli_query($conn, $sql);
 ?>
 
